@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+    <title>AI-powered Mental Health Chatbot</title>
+</head>
+<body>
+    <div class="whole-container">
+        <h1 class="title">AI-powered Mental Health Chatbot</h1>
+        <main>
+            <div class="main-container">
+                {% block "main" %}
+                    <a href="{% url "chat:chatpage" %}">
+                        <button>
+                            Start Chat
+                        </button>
+                    </a>
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

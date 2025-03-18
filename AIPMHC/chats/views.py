@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
@@ -40,3 +40,6 @@ def chat(request):
         {"content":"message"},
         # content_type="application/json"
     )
+
+def chatpage_view(request):
+    return render(request, 'chats/chatpage.html')
