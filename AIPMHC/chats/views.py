@@ -1,36 +1,42 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from transformers import pipeline
+from .serializers import ChatSerializer
 # Create your views here.
+
+class CustomJsonBrowsableAPI(BrowsableAPIRenderer):
+    def get_default_renderer(self, view):
+        return JSONRenderer()
 
 emotions_detector =  pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base")
 
 def get_emotions(message):
     result = emotions_detector(message)
     print(result)
-    return {"result": "testing"}
+    return {"result": result}
+
 
 @api_view(["GET","POST"])
+@renderer_classes([CustomJsonBrowsableAPI, JSONRenderer])
 def chat(request):
     if request.method == "POST":
-        print("Content-Type:", request.content_type)  # Debugging
-        print("Raw Body:", request.body)  # Debugging
-        print("Headers:", request.headers)  # Debugging
-        print("POST", request.POST)
+
         try:
-            data = request.data
-            print("Parsed Data:", data)
+            serializer = ChatSerializer(data=request.data)
+            print("Parsed Data:", serializer)
         except Exception as e:
             return Response({"error": f"Failed to parse JSON: {str(e)}"}, status=400)
 
-        message = data.get("content", "")
+        if serializer.is_valid():
+            message = serializer.validated_data["content"]
         if not message:
-            return Response({"error": "Content cannot be empty"}, status=400)
+            return Response(serializer.errors)
 
         bot_response = get_emotions(message)
         return Response({"response": bot_response})
-        # user_message = "I am happy"
-        # bot_response = get_emotions(user_message)
-        # return Response({"response": bot_response})
-    return Response({"response":"test"})
+    return Response(
+        {"content":"message"},
+        # content_type="application/json"
+    )
